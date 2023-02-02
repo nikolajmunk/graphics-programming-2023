@@ -44,9 +44,14 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left  
-         0.5f, -0.5f, 0.0f, // right 
-         0.0f,  0.5f, 0.0f  // top   
+        // Tri 1
+        -0.5f, -0.5f, 0.0f, // bottom left  
+         0.5f, -0.5f, 0.0f, // bottom right 
+         0.5f,  0.5f, 0.0f,  // top right
+        // Tri 2
+        -0.5f, -0.5f, 0.0f, // bottom left 
+         0.5f,  0.5f, 0.0f, // top right
+        -0.5f,  0.5f, 0.5f // top left
     };
 
     VertexBufferObject vertexBufferObject;
@@ -58,9 +63,9 @@ int main()
     vertexArrayObject.Bind();
 
     vertexBufferObject.Bind();
-    std::span verticesSpan(vertices, sizeof(vertices)/sizeof(float));
+    int vertexCount(sizeof(vertices) / sizeof(float)); // Divide byte size by the size of a single float to get number of elements.
+    std::span verticesSpan(vertices, vertexCount);
     vertexBufferObject.AllocateData(verticesSpan);
-    //float g = sizeof(myverts);
     //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     VertexAttribute position(Data::GetType<float>(), 3);
@@ -97,7 +102,7 @@ int main()
         // draw our first triangle
         glUseProgram(shaderProgram);
         vertexArrayObject.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, vertexCount); // Uses dynamic vertex count. Should this be static?
         // vertexArrayObject.Unbind(); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
