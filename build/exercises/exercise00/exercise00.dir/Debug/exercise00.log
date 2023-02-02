@@ -1,2 +1,4 @@
 ﻿  main.cpp
+C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\exercises\exercise00\main.cpp(99,46): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\exercises\exercise00\main.cpp(127,30): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   exercise00.vcxproj -> C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\build\exercises\exercise00\Debug\exercise00.exe

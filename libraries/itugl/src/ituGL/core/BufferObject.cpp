@@ -53,4 +53,6 @@ void BufferObject::AllocateData(std::span<const std::byte> data, Usage usage)
 void BufferObject::UpdateData(std::span<const std::byte> data, size_t offset)
 {
     // (todo) 00.5: Update buffer subdata
+    Target target = GetTarget();
+    glBufferSubData(target, 0, data.size_bytes(), data.data());
 }

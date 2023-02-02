@@ -6,13 +6,14 @@
 #include <ituGL/geometry/VertexAttribute.h>
 #include <ituGL/core/Data.h>
 #include <iostream>
+#include <numbers>
 
 int buildShaderProgram();
 void processInput(GLFWwindow* window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_HEIGHT = 800;
 
 int main()
 {
@@ -93,6 +94,9 @@ int main()
 
     ebo.Unbind();
 
+    float time{}, angle{};
+    float length = (float)std::sqrt(2)/2;
+    const float ninety = std::numbers::pi / 2;
 
     // uncomment this call to draw in wireframe polygons.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -107,12 +111,29 @@ int main()
 
         // render
         // ------
+        time += 0.1f;
+        angle = time * 0.01f;
         //deviceGL.Clear(0.2f, 0.3f, 0.3f, 1.0f);
         deviceGL.Clear(0.8f, 0.3f, 0.2f, 1.0f); // Background color
 
         // draw our first triangle
         glUseProgram(shaderProgram);
+
+        float offset{};
+        for (size_t i = 0; i < vertexCount / 3; i++)
+        {
+            float radians = ninety * i;
+            int vertX = 3 * i;
+            int vertY = vertX + 1;
+            float x = std::sin(angle + radians) * length;
+            float y = std::cos(angle + radians) * length;
+            vertices[vertX] = x;
+            vertices[vertY] = y;
+        }
+
         vao.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        vbo.Bind();
+        vbo.UpdateData(verticesSpan);
         //glDrawArrays(GL_TRIANGLES, 0, vertexCount); // Uses dynamic vertex count. Should this be static?
         glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
         // vertexArrayObject.Unbind(); // no need to unbind it every time 
