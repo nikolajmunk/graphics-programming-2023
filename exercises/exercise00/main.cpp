@@ -2,6 +2,7 @@
 #include <ituGL/application/Window.h>
 #include <ituGL/geometry/VertexArrayObject.h>
 #include <ituGL/geometry/VertexBufferObject.h>
+#include <ituGL/geometry/ElementBufferObject.h>
 #include <ituGL/geometry/VertexAttribute.h>
 #include <ituGL/core/Data.h>
 #include <iostream>
@@ -44,43 +45,53 @@ int main()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        // Tri 1
         -0.5f, -0.5f, 0.0f, // bottom left  
          0.5f, -0.5f, 0.0f, // bottom right 
          0.5f,  0.5f, 0.0f,  // top right
-        // Tri 2
-        -0.5f, -0.5f, 0.0f, // bottom left 
-         0.5f,  0.5f, 0.0f, // top right
-        -0.5f,  0.5f, 0.5f // top left
+        -0.5f,  0.5f, 0.0f // top left
     };
 
-    VertexBufferObject vertexBufferObject;
-    VertexArrayObject vertexArrayObject;
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0
+    };
+
+    VertexBufferObject vbo;
+    VertexArrayObject vao;
+    ElementBufferObject ebo;
 
     // unsigned int VBO, VAO;
     
     // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
-    vertexArrayObject.Bind();
+    vao.Bind();
 
-    vertexBufferObject.Bind();
+    vbo.Bind();
     int vertexCount(sizeof(vertices) / sizeof(float)); // Divide byte size by the size of a single float to get number of elements.
     std::span verticesSpan(vertices, vertexCount);
-    vertexBufferObject.AllocateData(verticesSpan);
+    vbo.AllocateData(verticesSpan);
     //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    ebo.Bind();
+    int indicesCount = sizeof(indices) / sizeof(unsigned int);
+    std::span indicesSpan(indices, indicesCount);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSpan.size_bytes(), indicesSpan.data(), GL_STATIC_DRAW);
+    ebo.AllocateData(indicesSpan);
 
     VertexAttribute position(Data::GetType<float>(), 3);
 
-    vertexArrayObject.SetAttribute(0, position, 0, 0);
+    vao.SetAttribute(0, position, 0, 0);
 
     //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     //glEnableVertexAttribArray(0);
 
     // note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
-    vertexBufferObject.Unbind();
+    vbo.Unbind();
 
     // You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
-    vertexArrayObject.Unbind();
+    vao.Unbind();
+
+    ebo.Unbind();
 
 
     // uncomment this call to draw in wireframe polygons.
@@ -101,8 +112,9 @@ int main()
 
         // draw our first triangle
         glUseProgram(shaderProgram);
-        vertexArrayObject.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount); // Uses dynamic vertex count. Should this be static?
+        vao.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+        //glDrawArrays(GL_TRIANGLES, 0, vertexCount); // Uses dynamic vertex count. Should this be static?
+        glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
         // vertexArrayObject.Unbind(); // no need to unbind it every time 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

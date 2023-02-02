@@ -12,7 +12,7 @@ BufferObject::BufferObject() : Object(NullHandle)
 // Get object handle and delete 1 buffer
 BufferObject::~BufferObject()
 {
-    Handle& handle = GetHandle();
+    Handle handle = GetHandle();
     // (todo) 00.1: Delete 1 buffer
     glDeleteBuffers(1, &handle);
 }
@@ -22,7 +22,7 @@ void BufferObject::Bind(Target target) const
 {
     Handle handle = GetHandle();
     // (todo) 00.1: Bind buffer
-    glBindBuffer(GL_ARRAY_BUFFER, handle);
+    glBindBuffer(target, handle);
 }
 
 // Bind the null handle to the specific target
@@ -30,7 +30,7 @@ void BufferObject::Unbind(Target target)
 {
     Handle handle = NullHandle;
     // (todo) 00.1: Bind null buffer
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, handle);
 }
 
 // Get buffer Target and allocate buffer data
@@ -47,7 +47,6 @@ void BufferObject::AllocateData(std::span<const std::byte> data, Usage usage)
     Target target = GetTarget();
     // (todo) 00.1: Allocate with initial data, specifying the size in bytes and the pointer to the data
     glBufferData(target, data.size_bytes(), data.data(), usage); // Why does this work when sizeof(data) doesn't?
-
 }
 
 // Get buffer Target and set buffer subdata
