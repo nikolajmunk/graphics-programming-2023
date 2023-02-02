@@ -15,6 +15,13 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 800;
 
+//float time{}, angle{};
+float angle{};
+float length = (float)std::sqrt(2) / 2;
+const float TWOPI = std::numbers::pi * 2;
+const float ninety = std::numbers::pi / 2;
+float offsetX, offsetY;
+
 int main()
 {
     // glfw: initialize and configure
@@ -45,17 +52,67 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // bottom left  
-         0.5f, -0.5f, 0.0f, // bottom right 
-         0.5f,  0.5f, 0.0f,  // top right
-        -0.5f,  0.5f, 0.0f // top left
-    };
+    const int edgeVertexCount = 11;
 
-    unsigned int indices[] = {
+    //float vertices[] = {
+    //    -0.5f, -0.5f, 0.0f, // bottom left  
+    //     0.5f, -0.5f, 0.0f, // bottom right 
+    //     0.5f,  0.5f, 0.0f,  // top right
+    //    -0.5f,  0.5f, 0.0f // top left
+    //};
+
+    //float vertices[] = {
+    //     0.0f,  0.0f, 0.0f,
+    //    -0.5f, -0.5f, 0.0f, // bottom left  
+    //     0.5f, -0.5f, 0.0f, // bottom right 
+    //     0.5f,  0.5f, 0.0f,  // top right
+    //    -0.5f,  0.5f, 0.0f // top left
+    //};
+
+    float vertices[(edgeVertexCount+1)*3]{};
+
+    float slice = TWOPI / edgeVertexCount;
+
+    for (size_t i = 1; i < edgeVertexCount+1; i++)
+    {
+        float x = std::sin(slice * (i-1)) * length;
+        float y = std::cos(slice * (i-1)) * length;
+
+        vertices[i * 3] = x;
+        vertices[i * 3 + 1] = y;
+    }
+
+    /*for (size_t i = 1; i < edgeVertexCount; i ++)
+    {
+        angle = slice * i;
+
+        float x = std::sin(angle) * length;
+        float y = std::cos(angle) * length;
+
+        vertices[i*3] = x;
+        vertices[i*3+1] = y;
+    }*/
+
+    /*unsigned int indices[] = {
         0, 1, 2,
         2, 3, 0
-    };
+    };*/
+
+
+
+    unsigned int indices[edgeVertexCount*3]{};
+
+    for (size_t i = 0; i < edgeVertexCount; i++)
+    {
+        int x = i * 3;
+        int y = i * 3 + 1;
+        int z = i * 3 + 2;
+        indices[i*3] = 0;
+        int q = (i + 1) % (edgeVertexCount) + 1;
+        int r = (i) % (edgeVertexCount) + 1;
+        indices[i*3 + 1] = q;
+        indices[i*3 + 2] = r;
+    }
 
     VertexBufferObject vbo;
     VertexArrayObject vao;
@@ -94,12 +151,8 @@ int main()
 
     ebo.Unbind();
 
-    float time{}, angle{};
-    float length = (float)std::sqrt(2)/2;
-    const float ninety = std::numbers::pi / 2;
-
     // uncomment this call to draw in wireframe polygons.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // render loop
     // -----------
@@ -111,8 +164,8 @@ int main()
 
         // render
         // ------
-        time += 0.1f;
-        angle = time * 0.01f;
+        //time += 0.1f;
+        //angle = time * 0.01f;
         //deviceGL.Clear(0.2f, 0.3f, 0.3f, 1.0f);
         deviceGL.Clear(0.8f, 0.3f, 0.2f, 1.0f); // Background color
 
@@ -120,7 +173,7 @@ int main()
         glUseProgram(shaderProgram);
 
         float offset{};
-        for (size_t i = 0; i < vertexCount / 3; i++)
+        /*for (size_t i = 0; i < vertexCount / 3; i++)
         {
             float radians = ninety * i;
             int vertX = 3 * i;
@@ -129,6 +182,12 @@ int main()
             float y = std::cos(angle + radians) * length;
             vertices[vertX] = x;
             vertices[vertY] = y;
+        }*/
+
+        for (size_t i = 0; i < edgeVertexCount+1; i++)
+        {
+            vertices[i * 3] += offsetX;
+            vertices[i * 3 + 1] += offsetY;
         }
 
         vao.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
@@ -162,6 +221,12 @@ void processInput(GLFWwindow* window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    float amount = 0.0006f;
+
+    offsetX = -amount * glfwGetKey(window, GLFW_KEY_LEFT) + amount * glfwGetKey(window, GLFW_KEY_RIGHT);
+    offsetY = -amount * glfwGetKey(window, GLFW_KEY_DOWN) + amount * glfwGetKey(window, GLFW_KEY_UP);
+
 }
 
 // build the shader program
