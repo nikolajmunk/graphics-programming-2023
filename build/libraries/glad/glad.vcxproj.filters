@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\libraries\glad\src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\libraries\glad\include\glad\glad.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\libraries\glad\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{E415258B-ACFE-35FD-B5CA-3CBC18966773}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{78D0AC0B-9440-3552-A999-F1F36DAF7903}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

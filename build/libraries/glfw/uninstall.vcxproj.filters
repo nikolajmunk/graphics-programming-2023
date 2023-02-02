@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\build\CMakeFiles\863e1d50a7543b31a16d769b9db85797\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\libraries\glfw\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Nikolaj\Documents\Code\2023GP\graphics-programming-2023\build\libraries\glfw\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{565E7B4F-EF47-3093-A387-0FEB306631EF}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
