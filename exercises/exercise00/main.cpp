@@ -21,6 +21,7 @@ float length = (float)std::sqrt(2) / 2;
 const float TWOPI = std::numbers::pi * 2;
 const float ninety = std::numbers::pi / 2;
 float offsetX, offsetY;
+float indentAmount = 0.5f;
 
 int main()
 {
@@ -52,7 +53,7 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    const int edgeVertexCount = 11;
+    const int edgeVertexCount = 18;
 
     //float vertices[] = {
     //    -0.5f, -0.5f, 0.0f, // bottom left  
@@ -75,8 +76,10 @@ int main()
 
     for (size_t i = 1; i < edgeVertexCount+1; i++)
     {
-        float x = std::sin(slice * (i-1)) * length;
-        float y = std::cos(slice * (i-1)) * length;
+        float newLength = length * (i % 2 == 0 ? indentAmount : 1.0f);
+
+        float x = std::sin(slice * (i-1)) * newLength;
+        float y = std::cos(slice * (i-1)) * newLength;
 
         vertices[i * 3] = x;
         vertices[i * 3 + 1] = y;
@@ -184,11 +187,25 @@ int main()
             vertices[vertY] = y;
         }*/
 
-        for (size_t i = 0; i < edgeVertexCount+1; i++)
+        vertices[0] += offsetX;
+        vertices[1] += offsetY;
+
+        for (size_t i = 1; i < edgeVertexCount + 1; i++)
         {
-            vertices[i * 3] += offsetX;
-            vertices[i * 3 + 1] += offsetY;
+            float newLength = length * (i % 2 == 0 ? indentAmount : 1.0f);
+
+            float x = std::sin(slice * (i - 1) + angle) * newLength;
+            float y = std::cos(slice * (i - 1) + angle) * newLength;
+
+            vertices[i * 3] = vertices[0] + x;
+            vertices[i * 3 + 1] = vertices[1] + y;
         }
+
+        //for (size_t i = 0; i < edgeVertexCount+1; i++)
+        //{
+        //    vertices[i * 3] += offsetX;
+        //    vertices[i * 3 + 1] += offsetY;
+        //}
 
         vao.Bind(); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
         vbo.Bind();
@@ -227,6 +244,8 @@ void processInput(GLFWwindow* window)
     offsetX = -amount * glfwGetKey(window, GLFW_KEY_LEFT) + amount * glfwGetKey(window, GLFW_KEY_RIGHT);
     offsetY = -amount * glfwGetKey(window, GLFW_KEY_DOWN) + amount * glfwGetKey(window, GLFW_KEY_UP);
 
+    angle += amount * (glfwGetKey(window, GLFW_KEY_W) - glfwGetKey(window, GLFW_KEY_Q));
+    indentAmount += amount * (glfwGetKey(window, GLFW_KEY_PERIOD) - glfwGetKey(window, GLFW_KEY_COMMA));
 }
 
 // build the shader program
