@@ -169,8 +169,7 @@ int main()
         // ------
         //time += 0.1f;
         //angle = time * 0.01f;
-        //deviceGL.Clear(0.2f, 0.3f, 0.3f, 1.0f);
-        deviceGL.Clear(0.8f, 0.3f, 0.2f, 1.0f); // Background color
+        deviceGL.Clear(Color(0.2f, 0.3f, 0.3f, 1.0f));
 
         // draw our first triangle
         glUseProgram(shaderProgram);
