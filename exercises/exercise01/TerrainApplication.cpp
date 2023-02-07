@@ -45,6 +45,7 @@ void TerrainApplication::Initialize()
 
     // (todo) 01.1: Create containers for the vertex position
     std::vector<Vector3> vertices;
+    std::vector<Vector2> uvs;
 
     // (todo) 01.1: Fill in vertex data
     int i = 0;
@@ -59,13 +60,19 @@ void TerrainApplication::Initialize()
             /*std::cout << x << ", " << y << std::endl;*/
             Vector3 origin{ float(x) * distanceX - 0.5f, float(y) * distanceY - 0.5f, 0.0f};
             vertices.push_back(origin);
+            uvs.push_back(Vector2(0, 0));
             vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
+            uvs.push_back(Vector2(1, 0));
             vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
+            uvs.push_back(Vector2(0, 1));
 
 
-            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
             vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
+            uvs.push_back(Vector2(0, 1));
+            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
+            uvs.push_back(Vector2(1, 0));
             vertices.push_back(Vector3(origin.x + distanceX, origin.y + distanceY, 0.0f));
+            uvs.push_back(Vector2(1, 1));
 
 
             i++;
@@ -75,9 +82,15 @@ void TerrainApplication::Initialize()
     // (todo) 01.1: Initialize VAO, and VBO
     m_vao.Bind();
     m_vbo.Bind();
+    int vertexCount = m_gridX * m_gridY * 6;
+    m_vbo.AllocateData(sizeof(float) * 3 * vertexCount + sizeof(float) * 2 * vertexCount);
+    m_vbo.UpdateData(std::span(vertices), 0);
+    m_vbo.UpdateData(std::span(uvs), sizeof(float) * 3 * vertexCount);
+
     VertexAttribute position(Data::Type::Float, 3);
     m_vao.SetAttribute(0, position, 0);
-    m_vbo.AllocateData(std::span(vertices));
+    VertexAttribute uv(Data::Type::Float, 2);
+    m_vao.SetAttribute(2, uv, sizeof(float) * 3 * vertexCount, 0);
 
     // (todo) 01.5: Initialize EBO
 
@@ -88,7 +101,7 @@ void TerrainApplication::Initialize()
 
     // (todo) 01.5: Unbind EBO
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 }
 
