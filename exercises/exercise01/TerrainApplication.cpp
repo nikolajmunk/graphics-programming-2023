@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <vector>
 
 // Helper structures. Declared here only for this exercise
 struct Vector2
@@ -43,19 +44,45 @@ void TerrainApplication::Initialize()
     BuildShaders();
 
     // (todo) 01.1: Create containers for the vertex position
-
+    std::vector<Vector3> vertices;
 
     // (todo) 01.1: Fill in vertex data
+    int i = 0;
+    int xPos = 0;
+    int yPos = m_gridY;
+    for (int x = 0; x < m_gridX; x++)
+    {
+        for (int y = m_gridY; y > 0; y--)
+        {
+            /*std::cout << x << ", " << y << std::endl;*/
+            Vector3 origin{ float(x), float(y), 0.0f};
+            vertices.push_back(Vector3(origin.x + 1, origin.y, 0.0f));
+            vertices.push_back(origin);
+            vertices.push_back(Vector3(origin.x, origin.y - 1, 0.0f));
 
+
+            vertices.push_back(Vector3(origin.x, origin.y - 1, 0.0f));
+            vertices.push_back(Vector3(origin.x + 1, origin.y - 1, 0.0f));
+            vertices.push_back(Vector3(origin.x + 1, origin.y, 0.0f));
+
+
+            i++;
+        }
+    }
 
     // (todo) 01.1: Initialize VAO, and VBO
-
+    m_vao.Bind();
+    m_vbo.Bind();
+    VertexAttribute position(Data::Type::Float, 3);
+    m_vao.SetAttribute(0, position, 0);
+    m_vbo.AllocateData(std::span(vertices));
 
     // (todo) 01.5: Initialize EBO
 
 
     // (todo) 01.1: Unbind VAO, and VBO
-
+    m_vao.Unbind();
+    m_vbo.Unbind();
 
     // (todo) 01.5: Unbind EBO
 
@@ -79,7 +106,8 @@ void TerrainApplication::Render()
     glUseProgram(m_shaderProgram);
 
     // (todo) 01.1: Draw the grid
-
+    m_vao.Bind();
+    glDrawArrays(GL_TRIANGLES, 0, m_gridX * m_gridY * 6);
 }
 
 void TerrainApplication::Cleanup()
@@ -116,19 +144,19 @@ void TerrainApplication::BuildShaders()
         "   switch (Mode)\n"
         "   {\n"
         "   default:\n"
-        "   case 0u:\n"
+        "   case 0:\n"
         "       FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n"
         "       break;\n"
-        "   case 1u:\n"
+        "   case 1:\n"
         "       FragColor = vec4(fract(texCoord), 0.0f, 1.0f);\n"
         "       break;\n"
-        "   case 2u:\n"
+        "   case 2:\n"
         "       FragColor = vec4(color, 1.0f);\n"
         "       break;\n"
-        "   case 3u:\n"
+        "   case 3:\n"
         "       FragColor = vec4(normalize(normal), 1.0f);\n"
         "       break;\n"
-        "   case 4u:\n"
+        "   case 4:\n"
         "       FragColor = vec4(color * max(dot(normalize(normal), normalize(vec3(1,0,1))), 0.2f), 1.0f);\n"
         "       break;\n"
         "   }\n"
