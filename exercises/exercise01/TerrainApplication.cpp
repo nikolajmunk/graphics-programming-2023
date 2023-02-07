@@ -32,7 +32,7 @@ struct Vector3
 
 
 TerrainApplication::TerrainApplication()
-    : Application(1024, 1024, "Terrain demo"), m_gridX(16), m_gridY(16), m_shaderProgram(0)
+    : Application(1024, 1024, "Terrain demo"), m_gridX(2), m_gridY(2), m_shaderProgram(0)
 {
 }
 
@@ -46,60 +46,63 @@ void TerrainApplication::Initialize()
     // (todo) 01.1: Create containers for the vertex position
     std::vector<Vector3> vertices;
     std::vector<Vector2> uvs;
+    std::vector<GLuint> indices;
 
     // (todo) 01.1: Fill in vertex data
-    int i = 0;
-    int xPos = 0;
-    int yPos = m_gridY;
     float distanceX = 1.0f / m_gridX;
     float distanceY = 1.0f / m_gridY;
-    for (GLuint x = 0; x < m_gridX; x++)
+    for (GLuint x = 0; x < m_gridX + 1; x++)
     {
-        for (GLuint y = 0; y < m_gridY; y++)
+        for (GLuint y = 0; y < m_gridY + 1; y++)
         {
-            /*std::cout << x << ", " << y << std::endl;*/
-            Vector3 origin{ float(x) * distanceX - 0.5f, float(y) * distanceY - 0.5f, 0.0f};
-            vertices.push_back(origin);
-            uvs.push_back(Vector2(0, 0));
-            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
-            uvs.push_back(Vector2(1, 0));
-            vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
-            uvs.push_back(Vector2(0, 1));
-
-
-            vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
-            uvs.push_back(Vector2(0, 1));
-            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
-            uvs.push_back(Vector2(1, 0));
-            vertices.push_back(Vector3(origin.x + distanceX, origin.y + distanceY, 0.0f));
-            uvs.push_back(Vector2(1, 1));
-
-
-            i++;
+            vertices.push_back(Vector3(float(x) * distanceX - 0.5f, float(y) * distanceY - 0.5f, 0.0f));
+            uvs.push_back(Vector2(x, y));
         }
     }
 
+    for (GLuint j = 0; j < m_gridY; j++)
+    {
+        for (GLuint i = 0; i < m_gridX; i++)
+        {
+            int offsetY = j * (m_gridX + 1);
+            indices.push_back(offsetY + i);
+            indices.push_back(offsetY + i + 1);
+            indices.push_back(offsetY + (m_gridX + 1) + i);
+
+            indices.push_back(offsetY + (m_gridX + 1) + i);
+            indices.push_back(offsetY + i + 1);
+            indices.push_back(offsetY + (m_gridX + 1) + i + 1);
+
+        }
+    }
+    std::cout << indices.size() + vertices.size();
     // (todo) 01.1: Initialize VAO, and VBO
     m_vao.Bind();
     m_vbo.Bind();
-    int vertexCount = m_gridX * m_gridY * 6;
-    m_vbo.AllocateData(sizeof(float) * 3 * vertexCount + sizeof(float) * 2 * vertexCount);
-    m_vbo.UpdateData(std::span(vertices), 0);
-    m_vbo.UpdateData(std::span(uvs), sizeof(float) * 3 * vertexCount);
+
+    std::span<Vector3> verticesSpan(vertices);
+    std::span<Vector2> uvsSpan(uvs);
+    int uvsOffset = verticesSpan.size_bytes();
+
+    m_vbo.AllocateData(verticesSpan.size_bytes() + uvsSpan.size_bytes());
+    m_vbo.UpdateData(verticesSpan, 0);
+    m_vbo.UpdateData(uvsSpan, uvsOffset);
 
     VertexAttribute position(Data::Type::Float, 3);
     m_vao.SetAttribute(0, position, 0);
+
     VertexAttribute uv(Data::Type::Float, 2);
-    m_vao.SetAttribute(2, uv, sizeof(float) * 3 * vertexCount, 0);
+    m_vao.SetAttribute(1, uv, uvsOffset, 0);
 
     // (todo) 01.5: Initialize EBO
-
-
+    m_ebo.Bind();
+    m_ebo.AllocateData(std::span(indices));
     // (todo) 01.1: Unbind VAO, and VBO
     m_vao.Unbind();
     m_vbo.Unbind();
 
     // (todo) 01.5: Unbind EBO
+    m_ebo.Unbind();
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -124,7 +127,8 @@ void TerrainApplication::Render()
 
     // (todo) 01.1: Draw the grid
     m_vao.Bind();
-    glDrawArrays(GL_TRIANGLES, 0, m_gridX * m_gridY * 6);
+    //glDrawArrays(GL_TRIANGLES, 0, m_gridX * m_gridY * 6);
+    glDrawElements(GL_TRIANGLES, m_gridX * m_gridY * 6, GL_UNSIGNED_INT, 0);
 }
 
 void TerrainApplication::Cleanup()
