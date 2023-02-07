@@ -50,20 +50,22 @@ void TerrainApplication::Initialize()
     int i = 0;
     int xPos = 0;
     int yPos = m_gridY;
-    for (int x = 0; x < m_gridX; x++)
+    float distanceX = 1.0f / m_gridX;
+    float distanceY = 1.0f / m_gridY;
+    for (GLuint x = 0; x < m_gridX; x++)
     {
-        for (int y = m_gridY; y > 0; y--)
+        for (GLuint y = 0; y < m_gridY; y++)
         {
             /*std::cout << x << ", " << y << std::endl;*/
-            Vector3 origin{ float(x), float(y), 0.0f};
-            vertices.push_back(Vector3(origin.x + 1, origin.y, 0.0f));
+            Vector3 origin{ float(x) * distanceX - 0.5f, float(y) * distanceY - 0.5f, 0.0f};
             vertices.push_back(origin);
-            vertices.push_back(Vector3(origin.x, origin.y - 1, 0.0f));
+            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
+            vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
 
 
-            vertices.push_back(Vector3(origin.x, origin.y - 1, 0.0f));
-            vertices.push_back(Vector3(origin.x + 1, origin.y - 1, 0.0f));
-            vertices.push_back(Vector3(origin.x + 1, origin.y, 0.0f));
+            vertices.push_back(Vector3(origin.x + distanceX, origin.y, 0.0f));
+            vertices.push_back(Vector3(origin.x, origin.y + distanceY, 0.0f));
+            vertices.push_back(Vector3(origin.x + distanceX, origin.y + distanceY, 0.0f));
 
 
             i++;
@@ -85,6 +87,8 @@ void TerrainApplication::Initialize()
     m_vbo.Unbind();
 
     // (todo) 01.5: Unbind EBO
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 }
 
