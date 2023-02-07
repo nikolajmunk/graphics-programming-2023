@@ -1,5 +1,7 @@
-#include "TerrainApplication.h"
+#define STB_PERLIN_IMPLEMENTATION
 
+#include "TerrainApplication.h"
+#include <stb_perlin.h>
 // (todo) 01.1: Include the libraries you need
 
 #include <cmath>
@@ -32,7 +34,7 @@ struct Vector3
 
 
 TerrainApplication::TerrainApplication()
-    : Application(1024, 1024, "Terrain demo"), m_gridX(2), m_gridY(2), m_shaderProgram(0)
+    : Application(1024, 1024, "Terrain demo"), m_gridX(64), m_gridY(64), m_shaderProgram(0)
 {
 }
 
@@ -51,11 +53,16 @@ void TerrainApplication::Initialize()
     // (todo) 01.1: Fill in vertex data
     float distanceX = 1.0f / m_gridX;
     float distanceY = 1.0f / m_gridY;
+    float frequency = 3.0f;
+    float amplitude = 0.3f;
     for (GLuint x = 0; x < m_gridX + 1; x++)
     {
         for (GLuint y = 0; y < m_gridY + 1; y++)
         {
-            vertices.push_back(Vector3(float(x) * distanceX - 0.5f, float(y) * distanceY - 0.5f, 0.0f));
+            float xPos = float(x) * distanceX - 0.5f;
+            float yPos = float(y) * distanceY - 0.5f;
+            float z = stb_perlin_fbm_noise3(xPos * frequency, yPos * frequency, 0.0, 2, 0.5, 6) * amplitude;
+            vertices.push_back(Vector3(xPos, yPos, z));
             uvs.push_back(Vector2(x, y));
         }
     }
@@ -75,7 +82,7 @@ void TerrainApplication::Initialize()
 
         }
     }
-    std::cout << indices.size() + vertices.size();
+    //std::cout << indices.size() + vertices.size();
     // (todo) 01.1: Initialize VAO, and VBO
     m_vao.Bind();
     m_vbo.Bind();
@@ -105,6 +112,7 @@ void TerrainApplication::Initialize()
     m_ebo.Unbind();
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 }
 
