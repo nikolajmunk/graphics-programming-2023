@@ -8,6 +8,8 @@
 #include <iostream>
 #include <vector>
 
+//bool useDepth;
+
 // Helper structures. Declared here only for this exercise
 struct Vector2
 {
@@ -29,6 +31,30 @@ struct Vector3
     }
 };
 
+Color colorFromheight(float height)
+{
+    if (height < -0.7f)
+    {
+        return Color(0.06f, 0.08f, 0.16f, 1.0f);
+    }
+    else if (height < -0.1f)
+    {
+        return Color(0.18f, 0.24f, 0.48f, 1.0f);
+    }
+    else if (height < 0.1f)
+    {
+        return Color(0.7f, 0.65f, 0.48f, 1.0f);
+    }
+    else if (height < 0.5f)
+    {
+        return Color(0.47f, 0.58f, 0.41f, 1.0f);
+    }
+    else
+    {
+        return Color(0.78f, 0.82f, 0.74f, 1.0f);
+    }
+}
+
 // (todo) 01.8: Declare an struct with the vertex format
 
 
@@ -49,6 +75,8 @@ void TerrainApplication::Initialize()
     std::vector<Vector3> vertices;
     std::vector<Vector2> uvs;
     std::vector<GLuint> indices;
+    std::vector<Color> colors;
+    const Color mainColor(0.0f, 0.5f, 1.0f, 1.0f);
 
     // (todo) 01.1: Fill in vertex data
     float distanceX = 1.0f / m_gridX;
@@ -64,6 +92,8 @@ void TerrainApplication::Initialize()
             float z = stb_perlin_fbm_noise3(xPos * frequency, yPos * frequency, 0.0, 2, 0.5, 6) * amplitude;
             vertices.push_back(Vector3(xPos, yPos, z));
             uvs.push_back(Vector2(x, y));
+            float colorfrom{ (z / amplitude)/2 + 0.5f };
+            colors.push_back(colorFromheight(z / amplitude));
         }
     }
 
@@ -89,17 +119,23 @@ void TerrainApplication::Initialize()
 
     std::span<Vector3> verticesSpan(vertices);
     std::span<Vector2> uvsSpan(uvs);
+    std::span<Color> colorsSpan(colors);
     int uvsOffset = verticesSpan.size_bytes();
+    int colorsOffset = uvsOffset + uvsSpan.size_bytes();
 
-    m_vbo.AllocateData(verticesSpan.size_bytes() + uvsSpan.size_bytes());
+    m_vbo.AllocateData(verticesSpan.size_bytes() + uvsSpan.size_bytes() + colorsSpan.size_bytes());
     m_vbo.UpdateData(verticesSpan, 0);
     m_vbo.UpdateData(uvsSpan, uvsOffset);
+    m_vbo.UpdateData(colorsSpan, colorsOffset);
 
     VertexAttribute position(Data::Type::Float, 3);
     m_vao.SetAttribute(0, position, 0);
 
     VertexAttribute uv(Data::Type::Float, 2);
     m_vao.SetAttribute(1, uv, uvsOffset, 0);
+
+    VertexAttribute color(Data::Type::Float, 4);
+    m_vao.SetAttribute(2, color, colorsOffset, 0);
 
     // (todo) 01.5: Initialize EBO
     m_ebo.Bind();
@@ -112,8 +148,9 @@ void TerrainApplication::Initialize()
     m_ebo.Unbind();
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_DEPTH_TEST);
+    //useDepth = false;
 }
 
 void TerrainApplication::Update()
@@ -126,7 +163,6 @@ void TerrainApplication::Update()
 void TerrainApplication::Render()
 {
     Application::Render();
-
     // Clear color and depth
     GetDevice().Clear(true, Color(0.0f, 0.0f, 0.0f, 1.0f), true, 1.0f);
 
@@ -250,4 +286,19 @@ void TerrainApplication::UpdateOutputMode()
         glUseProgram(m_shaderProgram);
         glUniformMatrix4fv(matrixLocation, 1, false, projMatrix);
     }
+
+    //if (GetMainWindow().IsKeyPressed(GLFW_KEY_SPACE) && !GetMainWindow().IsKeyRepeated(GLFW_KEY_SPACE)) {
+    //    if (useDepth)
+    //    {
+    //        glEnable(GL_DEPTH_TEST);
+    //        //glDepthFunc(GL_GREATER);
+    //    }
+    //    else
+    //    {
+    //        //glDepthFunc(GL_LESS);
+    //        glDisable(GL_DEPTH_TEST);
+    //    }
+    //    useDepth = !useDepth;
+    //    std::cout << useDepth;
+    //}
 }
