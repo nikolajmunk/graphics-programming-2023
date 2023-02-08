@@ -56,7 +56,12 @@ Color colorFromheight(float height)
 }
 
 // (todo) 01.8: Declare an struct with the vertex format
-
+struct Vertex
+{
+    Vector3 position;
+    Vector2 uv;
+    Color color;
+};
 
 
 TerrainApplication::TerrainApplication()
@@ -72,10 +77,8 @@ void TerrainApplication::Initialize()
     BuildShaders();
 
     // (todo) 01.1: Create containers for the vertex position
-    std::vector<Vector3> vertices;
-    std::vector<Vector2> uvs;
     std::vector<GLuint> indices;
-    std::vector<Color> colors;
+    std::vector<Vertex> vertices;
     const Color mainColor(0.0f, 0.5f, 1.0f, 1.0f);
 
     // (todo) 01.1: Fill in vertex data
@@ -87,13 +90,18 @@ void TerrainApplication::Initialize()
     {
         for (GLuint y = 0; y < m_gridY + 1; y++)
         {
+            Vertex v;
             float xPos = float(x) * distanceX - 0.5f;
             float yPos = float(y) * distanceY - 0.5f;
             float z = stb_perlin_fbm_noise3(xPos * frequency, yPos * frequency, 0.0, 2, 0.5, 6) * amplitude;
-            vertices.push_back(Vector3(xPos, yPos, z));
-            uvs.push_back(Vector2(x, y));
+            v.position = Vector3(xPos, yPos, z);
+
+            v.uv = Vector2(x, y);
+
             float colorfrom{ (z / amplitude)/2 + 0.5f };
-            colors.push_back(colorFromheight(z / amplitude));
+            v.color = colorFromheight(z / amplitude);
+
+            vertices.push_back(v);
         }
     }
 
@@ -112,30 +120,25 @@ void TerrainApplication::Initialize()
 
         }
     }
-    //std::cout << indices.size() + vertices.size();
-    // (todo) 01.1: Initialize VAO, and VBO
+
     m_vao.Bind();
     m_vbo.Bind();
 
-    std::span<Vector3> verticesSpan(vertices);
-    std::span<Vector2> uvsSpan(uvs);
-    std::span<Color> colorsSpan(colors);
-    int uvsOffset = verticesSpan.size_bytes();
-    int colorsOffset = uvsOffset + uvsSpan.size_bytes();
 
-    m_vbo.AllocateData(verticesSpan.size_bytes() + uvsSpan.size_bytes() + colorsSpan.size_bytes());
-    m_vbo.UpdateData(verticesSpan, 0);
-    m_vbo.UpdateData(uvsSpan, uvsOffset);
-    m_vbo.UpdateData(colorsSpan, colorsOffset);
+    std::span<Vertex> verticesSpan(vertices);
+    m_vbo.AllocateData(verticesSpan);
+    int offset = 0;
 
     VertexAttribute position(Data::Type::Float, 3);
-    m_vao.SetAttribute(0, position, 0);
+    m_vao.SetAttribute(0, position, 0, sizeof(Vertex));
+    offset += position.GetSize();
 
     VertexAttribute uv(Data::Type::Float, 2);
-    m_vao.SetAttribute(1, uv, uvsOffset, 0);
+    m_vao.SetAttribute(1, uv, offset, sizeof(Vertex));
+    offset += uv.GetSize();
 
     VertexAttribute color(Data::Type::Float, 4);
-    m_vao.SetAttribute(2, color, colorsOffset, 0);
+    m_vao.SetAttribute(2, color, offset, sizeof(Vertex));
 
     // (todo) 01.5: Initialize EBO
     m_ebo.Bind();
