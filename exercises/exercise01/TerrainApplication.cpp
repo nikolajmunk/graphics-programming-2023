@@ -12,7 +12,6 @@
 //bool useDepth;
 bool wireframeMode{};
 bool listenToInput{ true };
-float scrollTime{};
 
 // Helper structures. Declared here only for this exercise
 struct Vector2
@@ -172,7 +171,7 @@ void TerrainApplication::Initialize()
     }
 
     // Set height, color, and normals
-    setHeightColor(vertices, scrollTime);
+    setHeightColor(vertices, 0);
     setNormals(vertices, m_gridX + 1, m_gridY + 1);
 
     m_vao.Bind();
