@@ -215,6 +215,8 @@ void TerrainApplication::Update()
 
     UpdateOutputMode();
 
+    setHeightColor(vertices, GetCurrentTime() * 0.17f);
+    setNormals(vertices, m_gridX + 1, m_gridY + 1);
 }
 
 void TerrainApplication::Render()
@@ -227,6 +229,9 @@ void TerrainApplication::Render()
     glUseProgram(m_shaderProgram);
 
     m_vao.Bind();
+    m_vbo.Bind();
+    m_vbo.UpdateData(std::span(vertices));
+    
     glDrawElements(GL_TRIANGLES, m_gridX * m_gridY * 6, GL_UNSIGNED_INT, 0);
 }
 
