@@ -7,8 +7,12 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 //bool useDepth;
+bool wireframeMode{};
+bool listenToInput{ true };
+float scrollTime{};
 
 // Helper structures. Declared here only for this exercise
 struct Vector2
@@ -29,6 +33,14 @@ struct Vector3
         float length = std::sqrt(1 + x * x + y * y);
         return Vector3(x / length, y / length, z / length);
     }
+};
+
+struct Vertex
+{
+    Vector3 position;
+    Vector2 uv;
+    Color color;
+    Vector3 normal;
 };
 
 Color colorFromheight(float height)
@@ -55,17 +67,53 @@ Color colorFromheight(float height)
     }
 }
 
-// (todo) 01.8: Declare an struct with the vertex format
-struct Vertex
+void setNormals(std::vector<Vertex>& verts, int xSize, int ySize)
 {
-    Vector3 position;
-    Vector2 uv;
-    Color color;
-};
+    for (int y = 0; y < ySize; y++)
+    {
+        for (int x = 0; x < xSize; x++)
+        {
+            int i = y * xSize + x;
+            int d = std::max(y - 1, 0) * xSize + x;
+            int u = std::min(ySize - 1, y + 1) * xSize + x;
+            int r = y * ySize + std::clamp(x + 1, 0, xSize - 1);
+            int l = y * ySize + std::clamp(x - 1, 0, xSize - 1);
 
+            Vertex left = verts[l];
+            Vertex right = verts[r];
+            Vertex up = verts[u];
+            Vertex down = verts[d];
+
+            float deltaX((right.position.z - left.position.z) / (right.position.x - left.position.x));
+            float deltaY((up.position.z - down.position.z) / (up.position.y - down.position.y));
+
+            Vector3 normal(deltaX, deltaY, 1.0f);
+            normal.Normalize();
+
+            verts[i].normal = normal;
+            continue;
+
+        }
+    }
+}
+
+void setHeightColor(std::vector<Vertex>& verts, float time) {
+    float frequency = 3.0f;
+    float amplitude = 0.3f;
+    for (Vertex& v : verts) {
+        float z = stb_perlin_fbm_noise3(v.position.x * frequency, v.position.y * frequency, time, 2, 0.5, 6);
+        v.position.z = z * amplitude;
+
+        float colorfrom{ z / 2 + 0.5f };
+        v.color = colorFromheight(z / amplitude);
+    }
+
+}
+
+std::vector<Vertex> vertices;
 
 TerrainApplication::TerrainApplication()
-    : Application(1024, 1024, "Terrain demo"), m_gridX(64), m_gridY(64), m_shaderProgram(0)
+    : Application(1024, 1024, "Terrain demo"), m_gridX(128), m_gridY(128), m_shaderProgram(0)
 {
 }
 
@@ -78,32 +126,34 @@ void TerrainApplication::Initialize()
 
     // (todo) 01.1: Create containers for the vertex position
     std::vector<GLuint> indices;
-    std::vector<Vertex> vertices;
+    //std::vector<Vertex> vertices;
     const Color mainColor(0.0f, 0.5f, 1.0f, 1.0f);
 
     // (todo) 01.1: Fill in vertex data
     float distanceX = 1.0f / m_gridX;
     float distanceY = 1.0f / m_gridY;
-    float frequency = 3.0f;
-    float amplitude = 0.3f;
-    for (GLuint x = 0; x < m_gridX + 1; x++)
+
+    int xSize = m_gridX + 1;
+    int ySize = m_gridY + 1;
+
+    // Set x,y positions and uvs for each vertex
+
+    for (GLuint y = 0; y < ySize; y++)
     {
-        for (GLuint y = 0; y < m_gridY + 1; y++)
+        for (GLuint x = 0; x < xSize; x++)
         {
             Vertex v;
             float xPos = float(x) * distanceX - 0.5f;
             float yPos = float(y) * distanceY - 0.5f;
-            float z = stb_perlin_fbm_noise3(xPos * frequency, yPos * frequency, 0.0, 2, 0.5, 6) * amplitude;
-            v.position = Vector3(xPos, yPos, z);
+            v.position = Vector3(xPos, yPos, 0.0f);
 
             v.uv = Vector2(x, y);
-
-            float colorfrom{ (z / amplitude)/2 + 0.5f };
-            v.color = colorFromheight(z / amplitude);
 
             vertices.push_back(v);
         }
     }
+
+    // Set indices
 
     for (GLuint j = 0; j < m_gridY; j++)
     {
@@ -121,13 +171,18 @@ void TerrainApplication::Initialize()
         }
     }
 
+    // Set height, color, and normals
+    setHeightColor(vertices, scrollTime);
+    setNormals(vertices, m_gridX + 1, m_gridY + 1);
+
     m_vao.Bind();
     m_vbo.Bind();
-
 
     std::span<Vertex> verticesSpan(vertices);
     m_vbo.AllocateData(verticesSpan);
     int offset = 0;
+
+    // Set attributes
 
     VertexAttribute position(Data::Type::Float, 3);
     m_vao.SetAttribute(0, position, 0, sizeof(Vertex));
@@ -139,21 +194,19 @@ void TerrainApplication::Initialize()
 
     VertexAttribute color(Data::Type::Float, 4);
     m_vao.SetAttribute(2, color, offset, sizeof(Vertex));
+    offset += color.GetSize();
 
-    // (todo) 01.5: Initialize EBO
+    VertexAttribute normal(Data::Type::Float, 3);
+    m_vao.SetAttribute(3, normal, offset, sizeof(Vertex));
+
     m_ebo.Bind();
     m_ebo.AllocateData(std::span(indices));
-    // (todo) 01.1: Unbind VAO, and VBO
+
     m_vao.Unbind();
     m_vbo.Unbind();
-
-    // (todo) 01.5: Unbind EBO
     m_ebo.Unbind();
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glEnable(GL_DEPTH_TEST);
-    //useDepth = false;
 }
 
 void TerrainApplication::Update()
@@ -161,6 +214,7 @@ void TerrainApplication::Update()
     Application::Update();
 
     UpdateOutputMode();
+
 }
 
 void TerrainApplication::Render()
@@ -172,9 +226,7 @@ void TerrainApplication::Render()
     // Set shader to be used
     glUseProgram(m_shaderProgram);
 
-    // (todo) 01.1: Draw the grid
     m_vao.Bind();
-    //glDrawArrays(GL_TRIANGLES, 0, m_gridX * m_gridY * 6);
     glDrawElements(GL_TRIANGLES, m_gridX * m_gridY * 6, GL_UNSIGNED_INT, 0);
 }
 
@@ -290,18 +342,23 @@ void TerrainApplication::UpdateOutputMode()
         glUniformMatrix4fv(matrixLocation, 1, false, projMatrix);
     }
 
-    //if (GetMainWindow().IsKeyPressed(GLFW_KEY_SPACE) && !GetMainWindow().IsKeyRepeated(GLFW_KEY_SPACE)) {
-    //    if (useDepth)
-    //    {
-    //        glEnable(GL_DEPTH_TEST);
-    //        //glDepthFunc(GL_GREATER);
-    //    }
-    //    else
-    //    {
-    //        //glDepthFunc(GL_LESS);
-    //        glDisable(GL_DEPTH_TEST);
-    //    }
-    //    useDepth = !useDepth;
-    //    std::cout << useDepth;
-    //}
+    // Suuuuuper janky implementation of wireframe toggling using period key
+
+    if (GetMainWindow().IsKeyPressed(GLFW_KEY_PERIOD) && listenToInput)
+    {
+        listenToInput = false;
+        wireframeMode = !wireframeMode;
+        if (wireframeMode) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        else {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
+
+    if (GetMainWindow().IsKeyReleased(GLFW_KEY_PERIOD) && !listenToInput)
+    {
+        listenToInput = true;
+    }
+
 }
