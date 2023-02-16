@@ -14,15 +14,19 @@ struct Particle
     glm::vec2 position;
     // (todo) 02.X: Add more vertex attributes
     float size;
+    float birth;
+    float lifetime;
  
 };
 
 // List of attributes of the particle. Must match the structure above
-const std::array<VertexAttribute, 2> s_vertexAttributes =
+const std::array<VertexAttribute, 4> s_vertexAttributes =
 {
     VertexAttribute(Data::Type::Float, 2), // position
     // (todo) 02.X: Add more vertex attributes
-    VertexAttribute(Data::Type::Float, 1)
+    VertexAttribute(Data::Type::Float, 1), // size
+    VertexAttribute(Data::Type::Float, 1), // birth
+    VertexAttribute(Data::Type::Float, 1) // lifetime
 };
 
 
@@ -41,6 +45,8 @@ void ParticlesApplication::Initialize()
 
     // Initialize the mouse position with the current position of the mouse
     m_mousePosition = GetMainWindow().GetMousePosition(true);
+
+    m_timeUniform = m_shaderProgram.GetUniformLocation("CurrentTime");
 
     // (todo) 02.2: Enable the GL_PROGRAM_POINT_SIZE feature on the device
     GetDevice().EnableFeature(GL_PROGRAM_POINT_SIZE);
@@ -68,8 +74,7 @@ void ParticlesApplication::Update()
     {
         // (todo) 02.X: Compute new particle attributes here
 
-
-        EmitParticle(mousePosition, Random01() * 20 + 5);
+        EmitParticle(mousePosition, Random01() * 20 + 5, 1 + Random01());
     }
 
     // save the mouse position (to compare next frame and obtain velocity)
@@ -85,7 +90,7 @@ void ParticlesApplication::Render()
     m_shaderProgram.Use();
 
     // (todo) 02.4: Set CurrentTime uniform
-
+    m_shaderProgram.SetUniform(m_timeUniform, GetCurrentTime());
 
     // (todo) 02.6: Set Gravity uniform
 
@@ -145,13 +150,15 @@ void ParticlesApplication::InitializeShaders()
     }
 }
 
-void ParticlesApplication::EmitParticle(const glm::vec2& position, const float size)
+void ParticlesApplication::EmitParticle(const glm::vec2& position, const float size, const float lifetime)
 {
     // Initialize the particle
     Particle particle;
     particle.position = position;
     // (todo) 02.X: Set the value for other attributes of the particle
     particle.size = size;
+    particle.birth = GetCurrentTime();
+    particle.lifetime = lifetime;
 
     // Get the index in the circular buffer
     unsigned int particleIndex = m_particleCount % m_particleCapacity;
