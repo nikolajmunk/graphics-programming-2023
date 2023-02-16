@@ -80,7 +80,10 @@ void ParticlesApplication::Update()
         // (todo) 02.X: Compute new particle attributes here
         glm::vec2 velocity = (mousePosition - m_mousePosition) / GetDeltaTime() * 0.5f;
 
-        EmitParticle(mousePosition, RandomColor(), Random01() * 20 + 5, 1 + Random01(), velocity);
+        float size = Random01() * 20 + 80;
+        //float size = 200;
+
+        EmitParticle(mousePosition, RandomColor(), size, 1 + Random01()*2, velocity);
     }
 
     // save the mouse position (to compare next frame and obtain velocity)
@@ -99,7 +102,7 @@ void ParticlesApplication::Render()
     m_shaderProgram.SetUniform(m_timeUniform, GetCurrentTime());
 
     // (todo) 02.6: Set Gravity uniform
-    m_shaderProgram.SetUniform(m_gravity, glm::vec2(0.0f, -3.0f));
+    m_shaderProgram.SetUniform(m_gravity, glm::vec2(0.0f, -1.0f));
 
     // Bind the particle system VAO
     m_vao.Bind();
