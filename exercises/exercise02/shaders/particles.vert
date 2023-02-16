@@ -5,6 +5,7 @@ layout (location = 1) in vec4 ParticleColor;
 layout (location = 2) in float ParticleSize;
 layout (location = 3) in float Birth;
 layout (location = 4) in float Duration;
+layout (location = 5) in vec2 Velocity;
 // (todo) 02.X: Add more vertex attributes
 
 
@@ -13,6 +14,7 @@ out vec4 Color;
 
 // (todo) 02.X: Add uniforms
 uniform float CurrentTime;
+uniform vec2 Gravity;
 
 void main()
 {
@@ -22,5 +24,8 @@ void main()
 	if (age > Duration) {
 		gl_PointSize = 0;
 	}
-	gl_Position = vec4(ParticlePosition, 0.0, 1.0);
+
+	vec2 pos = ParticlePosition + (Velocity * age) + (0.5f * Gravity * age*age);
+
+	gl_Position = vec4(pos.xy, 0.0, 1.0);
 }

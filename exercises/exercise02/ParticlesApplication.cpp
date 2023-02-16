@@ -17,18 +17,20 @@ struct Particle
     float size;
     float birth;
     float lifetime;
+    glm::vec2 velocity;
  
 };
 
 // List of attributes of the particle. Must match the structure above
-const std::array<VertexAttribute, 5> s_vertexAttributes =
+const std::array<VertexAttribute, 6> s_vertexAttributes =
 {
     VertexAttribute(Data::Type::Float, 2), // position
     VertexAttribute(Data::Type::Float, 4), // color
     // (todo) 02.X: Add more vertex attributes
     VertexAttribute(Data::Type::Float, 1), // size
     VertexAttribute(Data::Type::Float, 1), // birth
-    VertexAttribute(Data::Type::Float, 1) // lifetime
+    VertexAttribute(Data::Type::Float, 1), // lifetime
+    VertexAttribute(Data::Type::Float, 2) // lifetime
 };
 
 
@@ -49,6 +51,7 @@ void ParticlesApplication::Initialize()
     m_mousePosition = GetMainWindow().GetMousePosition(true);
 
     m_timeUniform = m_shaderProgram.GetUniformLocation("CurrentTime");
+    m_gravity = m_shaderProgram.GetUniformLocation("Gravity");
 
     // (todo) 02.2: Enable the GL_PROGRAM_POINT_SIZE feature on the device
     GetDevice().EnableFeature(GL_PROGRAM_POINT_SIZE);
@@ -75,8 +78,9 @@ void ParticlesApplication::Update()
     if (window.IsMouseButtonPressed(Window::MouseButton::Left))
     {
         // (todo) 02.X: Compute new particle attributes here
+        glm::vec2 velocity = (mousePosition - m_mousePosition) / GetDeltaTime() * 0.5f;
 
-        EmitParticle(mousePosition, RandomColor(), Random01() * 20 + 5, 1 + Random01());
+        EmitParticle(mousePosition, RandomColor(), Random01() * 20 + 5, 1 + Random01(), velocity);
     }
 
     // save the mouse position (to compare next frame and obtain velocity)
@@ -95,7 +99,7 @@ void ParticlesApplication::Render()
     m_shaderProgram.SetUniform(m_timeUniform, GetCurrentTime());
 
     // (todo) 02.6: Set Gravity uniform
-
+    m_shaderProgram.SetUniform(m_gravity, glm::vec2(0.0f, -3.0f));
 
     // Bind the particle system VAO
     m_vao.Bind();
@@ -152,7 +156,7 @@ void ParticlesApplication::InitializeShaders()
     }
 }
 
-void ParticlesApplication::EmitParticle(const glm::vec2& position, Color color, const float size, const float lifetime)
+void ParticlesApplication::EmitParticle(const glm::vec2& position, Color color, const float size, const float lifetime, const glm::vec2& velocity)
 {
     // Initialize the particle
     Particle particle;
@@ -162,6 +166,7 @@ void ParticlesApplication::EmitParticle(const glm::vec2& position, Color color, 
     particle.size = size;
     particle.birth = GetCurrentTime();
     particle.lifetime = lifetime;
+    particle.velocity = velocity;
 
     // Get the index in the circular buffer
     unsigned int particleIndex = m_particleCount % m_particleCapacity;
