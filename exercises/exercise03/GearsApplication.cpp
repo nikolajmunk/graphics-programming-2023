@@ -12,8 +12,6 @@
 #include <numbers>  // for PI constant
 #include <glm/gtx/transform.hpp>  // for matrix transformations
 
-ShaderProgram::Location worldMatrixLocation;
-
 GearsApplication::GearsApplication()
     : Application(1024, 1024, "Gears demo")
     , m_colorUniform(-1)
@@ -55,9 +53,20 @@ void GearsApplication::Render()
 
     // (todo) 03.1: Draw large gear at the center
     glm::mat4 centerGearMatrix(1.0f);
+
+    float rotationSpeed = 2.0f * GetCurrentTime(); // Rotation speed in radians;
+    glm::vec3 rotationAxis(0, 0, 1.0f);
+    centerGearMatrix = glm::rotate(centerGearMatrix, rotationSpeed/16, rotationAxis);
+
     DrawGear(m_largeGear, centerGearMatrix, Color(1.0f, 1.0f, 1.0f));
 
-    // (todo) 03.2: Draw medium gear to the right
+        // (todo) 03.2: Draw medium gear to the right
+
+    glm::mat4 rightGearMatrix(1.0f);
+    rightGearMatrix = glm::translate(rightGearMatrix, glm::vec3(0.75f, 0, 0));
+    rightGearMatrix = glm::rotate(rightGearMatrix, -rotationSpeed/8, rotationAxis);
+
+    DrawGear(m_mediumGear, rightGearMatrix, Color(1.0f, 1.0f, 0));
 
 
     // (todo) 03.3: Draw small gear at the top-left corner
@@ -111,11 +120,8 @@ void GearsApplication::DrawGear(const Mesh& mesh, const glm::mat4& worldMatrix, 
     m_shaderProgram.SetUniform(m_colorUniform, static_cast<glm::vec3>(color));
 
     // (todo) 03.1: Set the value of the WorldMatrix uniform
-    float rotationSpeed = 1.0f * GetCurrentTime(); // Rotation speed in radians;
-    glm::vec3 rotationAxis(0, 0, 1.0f);
-    glm::mat4 rotationMatrix = glm::rotate(rotationSpeed, rotationAxis);
 
-    m_shaderProgram.SetUniform(worldMatrixLocation, rotationMatrix * worldMatrix);
+    m_shaderProgram.SetUniform(worldMatrixLocation, worldMatrix);
 
     mesh.DrawSubmesh(0);
 }
