@@ -70,7 +70,11 @@ void GearsApplication::Render()
 
 
     // (todo) 03.3: Draw small gear at the top-left corner
-
+    glm::mat4 topleftGearMatrix(1.0f);
+    topleftGearMatrix = glm::translate(topleftGearMatrix, glm::vec3(-1, 1, 0));
+    topleftGearMatrix = glm::rotate(topleftGearMatrix, -rotationSpeed / 30 - 0.26f, rotationAxis);
+    topleftGearMatrix = glm::scale(topleftGearMatrix, glm::vec3(7.5f)); // Scale last; otherwise translation is also scaled! I think.
+    DrawGear(m_smallGear, topleftGearMatrix, Color(0.5f, 0.5f, 0.8f));
 
     // (todo) 03.4: Draw small gear linked to the center gear
 
