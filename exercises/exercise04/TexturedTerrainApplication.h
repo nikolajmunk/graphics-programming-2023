@@ -55,6 +55,9 @@ private:
 
     // (todo) 04.X: Add additional textures
     std::shared_ptr<Texture2DObject> m_grassTexture;
+    std::shared_ptr<Texture2DObject> m_dirtTexture;
+    std::shared_ptr<Texture2DObject> m_stoneTexture;
+    std::shared_ptr<Texture2DObject> m_snowTexture;
 
     std::shared_ptr<Texture2DObject> m_heightMapTexture;
     std::shared_ptr<Texture2DObject> m_heightMapTexture2;

@@ -92,6 +92,9 @@ void TexturedTerrainApplication::InitializeTextures()
 
     // (todo) 04.3: Load terrain textures here
     m_grassTexture = LoadTexture("textures/grass.jpg");
+    m_dirtTexture = LoadTexture("textures/dirt.png");
+    m_stoneTexture = LoadTexture("textures/rock.jpg");
+    m_snowTexture = LoadTexture("textures/snow.jpg");
 
     // (todo) 04.5: Load water texture here
 
@@ -121,7 +124,16 @@ void TexturedTerrainApplication::InitializeMaterials()
     m_terrainMaterial = std::make_shared<Material>(heightMapShaderProgram);
     m_terrainMaterial->SetUniformValue("Color", glm::vec4(1.0f));
     m_terrainMaterial->SetUniformValue("ColorTexture", m_grassTexture);
-    m_terrainMaterial->SetUniformValue("ColorTextureScale", glm::vec2(0.01));
+    m_terrainMaterial->SetUniformValue("DirtTexture", m_dirtTexture);
+    m_terrainMaterial->SetUniformValue("StoneTexture", m_stoneTexture);
+    m_terrainMaterial->SetUniformValue("SnowTexture", m_snowTexture);
+    m_terrainMaterial->SetUniformValue("ColorTextureScale", glm::vec2(0.05));
+
+    m_terrainMaterial->SetUniformValue("DirtRange", glm::vec2(-1.5, -0.5));
+    m_terrainMaterial->SetUniformValue("GrassRange", glm::vec2(-0.5, 0.9f));
+    m_terrainMaterial->SetUniformValue("StoneRange", glm::vec2(0.9f, 2.0f));
+    //m_terrainMaterial->SetUniformValue("SnowRange", glm::vec2(-0.6f, 3));
+
     m_terrainMaterial->SetUniformValue("Heightmap", m_heightMapTexture);
 
     m_terrainMaterial2 = std::make_shared<Material>(*m_terrainMaterial);
@@ -208,7 +220,7 @@ std::shared_ptr<Texture2DObject> TexturedTerrainApplication::CreateHeightMap(uns
             //pixels.push_back(std::sin(0.1f * i) * 0.1f);
             float x = (float(i) / (width - 1)) + coords.x;
             float y = (float(j) / (width - 1)) + coords.y;
-            pixels.push_back(stb_perlin_fbm_noise3(x * frequency, y * frequency, 0.0, 2, 0.5, 6) * amplitude);
+            pixels.push_back(stb_perlin_fbm_noise3(x * frequency, y * frequency, 0.0, 1.8, 0.5, 6) * amplitude);
         }
     }
 
