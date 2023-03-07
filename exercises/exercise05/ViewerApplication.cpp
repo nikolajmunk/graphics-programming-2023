@@ -51,6 +51,7 @@ void ViewerApplication::Render()
     GetDevice().Clear(true, Color(0.0f, 0.0f, 0.0f, 1.0f), true, 1.0f);
 
     m_model.Draw();
+    RenderGUI();
 }
 
 void ViewerApplication::Cleanup()
@@ -148,6 +149,11 @@ void ViewerApplication::RenderGUI()
     m_imGui.BeginFrame();
 
     // (todo) 05.4: Add debug controls for light properties
+    ImGui::ColorEdit3("AmbientColor", &m_ambientColor.r);
+    ImGui::Separator();
+    ImGui::DragFloat3("LightPosition", &m_lightPosition.x);
+    ImGui::DragFloat("LightIntensity", &m_lightIntensity);
+    ImGui::ColorEdit3("LightColor", &m_lightColor.r);
 
     m_imGui.EndFrame();
 }
