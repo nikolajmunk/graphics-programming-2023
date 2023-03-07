@@ -48,4 +48,7 @@ private:
 
     // (todo) 05.X: Add light variables
     Color m_ambientColor = glm::vec4(0.25f);
+    Color m_lightColor = glm::vec3(1.0f);
+    float m_lightIntensity = 1.0f;
+    glm::vec3 m_lightPosition = glm::vec3(10, 10, 5);
 };
