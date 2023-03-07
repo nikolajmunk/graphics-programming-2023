@@ -47,5 +47,5 @@ private:
     Model m_model;
 
     // (todo) 05.X: Add light variables
-
+    Color m_ambientColor = glm::vec4(0.25f);
 };
