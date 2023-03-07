@@ -41,6 +41,11 @@ void ViewerApplication::Update()
 
     // Update camera controller
     UpdateCamera();
+
+    for (unsigned int i = 0; i < m_model.GetMaterialCount(); i++)
+    {
+        m_model.GetMaterial(i).SetUniformValue("SpecularExponent", m_specularExponent);
+    }
 }
 
 void ViewerApplication::Render()
@@ -77,12 +82,15 @@ void ViewerApplication::InitializeModel()
     filteredUniforms.insert("AmbientColor");
     filteredUniforms.insert("LightColor");
     filteredUniforms.insert("LightPosition");
+    filteredUniforms.insert("CameraPosition");
 
     // Create reference material
     std::shared_ptr<Material> material = std::make_shared<Material>(shaderProgram, filteredUniforms);
     material->SetUniformValue("Color", glm::vec4(1.0f));
     material->SetUniformValue("AmbientReflection", 1.0f);
     material->SetUniformValue("DiffuseReflection", 1.0f);
+    material->SetUniformValue("SpecularReflection", 1.0f);
+    material->SetUniformValue("SpecularExponent", m_specularExponent);
 
     // Setup function
     ShaderProgram::Location worldMatrixLocation = shaderProgram->GetUniformLocation("WorldMatrix");
@@ -90,6 +98,7 @@ void ViewerApplication::InitializeModel()
     ShaderProgram::Location ambientColorlocation = shaderProgram->GetUniformLocation("AmbientColor");
     ShaderProgram::Location lightColorLocation = shaderProgram->GetUniformLocation("LightColor");
     ShaderProgram::Location lightPositionLocation = shaderProgram->GetUniformLocation("LightPosition");
+    ShaderProgram::Location cameraPositionLocation = shaderProgram->GetUniformLocation("CameraPosition");
     material->SetShaderSetupFunction([=](ShaderProgram& shaderProgram)
         {
             shaderProgram.SetUniform(worldMatrixLocation, glm::scale(glm::vec3(0.1f)));
@@ -99,6 +108,7 @@ void ViewerApplication::InitializeModel()
             shaderProgram.SetUniform(ambientColorlocation, glm::vec4(m_ambientColor));
             shaderProgram.SetUniform(lightColorLocation, glm::vec3(m_lightColor) * m_lightIntensity);
             shaderProgram.SetUniform(lightPositionLocation, m_lightPosition);
+            shaderProgram.SetUniform(cameraPositionLocation, m_cameraPosition);
 
         });
 
@@ -154,6 +164,8 @@ void ViewerApplication::RenderGUI()
     ImGui::DragFloat3("LightPosition", &m_lightPosition.x);
     ImGui::DragFloat("LightIntensity", &m_lightIntensity);
     ImGui::ColorEdit3("LightColor", &m_lightColor.r);
+    ImGui::Separator();
+    ImGui::DragFloat("SpecularExponent", &m_specularExponent);
 
     m_imGui.EndFrame();
 }
