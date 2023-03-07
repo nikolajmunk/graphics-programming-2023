@@ -97,11 +97,24 @@ void ViewerApplication::InitializeModel()
     loader.SetMaterialAttribute(VertexAttribute::Semantic::Normal, "VertexNormal");
     loader.SetMaterialAttribute(VertexAttribute::Semantic::TexCoord0, "VertexTexCoord");
 
+    loader.SetCreateMaterials(true);
+
     // Load model
     m_model = loader.Load("models/mill/Mill.obj");
 
     // (todo) 05.1: Load and set textures
+    Texture2DLoader textureLoader(TextureObject::FormatRGBA, TextureObject::InternalFormatRGBA8);
 
+    textureLoader.SetFlipVertical(true);
+
+    std::shared_ptr<Texture2DObject> groundShadowTexture = textureLoader.LoadShared("models/mill/Ground_shadow.jpg");
+    std::shared_ptr<Texture2DObject> groundTexture = textureLoader.LoadShared("models/mill/Ground_color.jpg");
+    std::shared_ptr<Texture2DObject> millTexture = textureLoader.LoadShared("models/mill/MillCat_color.jpg");
+
+    // Deduced this order from checking the obj file for order of submesh declaration
+    m_model.GetMaterial(0).SetUniformValue("ColorTexture", groundShadowTexture);
+    m_model.GetMaterial(1).SetUniformValue("ColorTexture", groundTexture);
+    m_model.GetMaterial(2).SetUniformValue("ColorTexture", millTexture);
 }
 
 void ViewerApplication::InitializeCamera()

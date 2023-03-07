@@ -48,6 +48,4 @@ private:
 
     // (todo) 05.X: Add light variables
 
-
-
 };
