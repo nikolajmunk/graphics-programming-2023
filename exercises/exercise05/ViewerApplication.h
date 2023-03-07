@@ -52,4 +52,8 @@ private:
     float m_lightIntensity = 1.0f;
     glm::vec3 m_lightPosition = glm::vec3(10, 10, 5);
     float m_specularExponent = 100.0;
+
+    glm::vec3 m_sunDirection{ 0,-1,0 };
+    glm::vec3 m_sunColor{ 1 };
+    float m_sunIntensity = 1.0f;
 };

@@ -16,6 +16,8 @@ uniform float SpecularExponent;
 uniform vec4 LightColor; // 4th component is intensity
 uniform vec3 LightPosition;
 uniform vec3 CameraPosition;
+uniform vec4 SunColor; // 4th component is intensity
+uniform vec3 SunDirection;
 
 vec4 GetColor()
 {
@@ -49,5 +51,9 @@ void main()
 	vec3 dirToCam = normalize(CameraPosition - WorldPosition);
 	float intensity = LightColor.a / (length(dirToLight) * 0.1f);
 	vec3 lightColor = LightColor.rgb * intensity;
-	FragColor = vec4(GetBlinnPhongReflection(GetColor(), lightColor, normalize(dirToLight), dirToCam, WorldNormal),1);
+	vec3 sunColor = SunColor.rgb * SunColor.a;
+	vec4 albedoColor = GetColor();
+	vec3 col = GetBlinnPhongReflection(albedoColor, lightColor, normalize(dirToLight), dirToCam, WorldNormal);
+	col += GetBlinnPhongReflection(albedoColor, sunColor, normalize(SunDirection), dirToCam, WorldNormal);
+	FragColor = vec4(col, 1);
 }

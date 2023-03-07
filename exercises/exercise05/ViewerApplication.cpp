@@ -81,6 +81,8 @@ void ViewerApplication::InitializeModel()
     filteredUniforms.insert("ViewProjMatrix");
     filteredUniforms.insert("AmbientColor");
     filteredUniforms.insert("LightColor");
+    filteredUniforms.insert("SunColor");
+    filteredUniforms.insert("SunDirection");
     filteredUniforms.insert("LightPosition");
     filteredUniforms.insert("CameraPosition");
 
@@ -99,6 +101,8 @@ void ViewerApplication::InitializeModel()
     ShaderProgram::Location lightColorLocation = shaderProgram->GetUniformLocation("LightColor");
     ShaderProgram::Location lightPositionLocation = shaderProgram->GetUniformLocation("LightPosition");
     ShaderProgram::Location cameraPositionLocation = shaderProgram->GetUniformLocation("CameraPosition");
+    ShaderProgram::Location sunColorLocation = shaderProgram->GetUniformLocation("SunColor");
+    ShaderProgram::Location sunDirectionLocation = shaderProgram->GetUniformLocation("SunDirection");
     material->SetShaderSetupFunction([=](ShaderProgram& shaderProgram)
         {
             shaderProgram.SetUniform(worldMatrixLocation, glm::scale(glm::vec3(0.1f)));
@@ -109,6 +113,10 @@ void ViewerApplication::InitializeModel()
             shaderProgram.SetUniform(lightColorLocation, glm::vec4(m_lightColor, m_lightIntensity));
             shaderProgram.SetUniform(lightPositionLocation, m_lightPosition);
             shaderProgram.SetUniform(cameraPositionLocation, m_cameraPosition);
+
+            shaderProgram.SetUniform(sunColorLocation, glm::vec4(m_sunColor, m_sunIntensity));
+            shaderProgram.SetUniform(sunDirectionLocation, m_sunDirection);
+
 
         });
 
@@ -164,6 +172,10 @@ void ViewerApplication::RenderGUI()
     ImGui::DragFloat3("LightPosition", &m_lightPosition.x);
     ImGui::DragFloat("LightIntensity", &m_lightIntensity);
     ImGui::ColorEdit3("LightColor", &m_lightColor.r);
+    ImGui::Separator();
+    ImGui::DragFloat3("SunDirection", &m_sunDirection.x);
+    ImGui::ColorEdit3("SunColor", &m_sunColor.r);
+    ImGui::DragFloat("SunIntensity", &m_sunIntensity);
     ImGui::Separator();
     ImGui::DragFloat("SpecularExponent", &m_specularExponent);
 
