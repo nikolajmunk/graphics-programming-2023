@@ -106,7 +106,7 @@ void ViewerApplication::InitializeModel()
 
             // (todo) 05.X: Set camera and light uniforms
             shaderProgram.SetUniform(ambientColorlocation, glm::vec4(m_ambientColor));
-            shaderProgram.SetUniform(lightColorLocation, glm::vec3(m_lightColor) * m_lightIntensity);
+            shaderProgram.SetUniform(lightColorLocation, glm::vec4(m_lightColor, m_lightIntensity));
             shaderProgram.SetUniform(lightPositionLocation, m_lightPosition);
             shaderProgram.SetUniform(cameraPositionLocation, m_cameraPosition);
 
